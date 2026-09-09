@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QaFramework.Mobile</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    The mobile layer sits directly on QaFramework.Core and adds exactly one third-party
+    dependency: the Appium client. Everything that is not Appium-specific (locators, screen
+    objects, the simulated driver) is written against the IMobileDriver seam, so the Appium
+    dependency stays contained inside Drivers/.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\QaFramework.Core\QaFramework.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Appium.WebDriver" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+  </ItemGroup>
+
+  <!--
+    Capability files and simulation fixtures are data, not code, and they are read from disk at
+    runtime rather than embedded as resources. Reason: a capability set is the thing an engineer
+    most often needs to tweak for a device they have in front of them, and editing a file in the
+    output directory to try a change is far faster than a rebuild. Content items flow through to
+    the output directory of any project that references this one.
+  -->
+  <ItemGroup>
+    <Content Include="Capabilities\capabilities.*.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Simulation\Fixtures\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.reqnroll.net/reqnroll-config-latest.json",
+
+  // Only two settings, and both are deliberate.
+  //
+  // bindingCulture: en-GB, pinned rather than inherited from the agent. Without it, a decimal
+  // quantity such as "1.5" in a feature file is parsed according to whatever culture the CI
+  // agent happens to have, and a suite that passes locally then fails on an agent configured for
+  // a comma decimal separator. This is a genuine, and genuinely confusing, cross-machine failure.
+  "language": {
+    "feature": "en"
+  },
+  "bindingCulture": {
+    "name": "en-GB"
+  }
+}

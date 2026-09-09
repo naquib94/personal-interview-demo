@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account - Meridian Trading (demo)</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <main>
+    <div class="panel">
+      <h1 data-testid="account-heading">Account</h1>
+      <p class="subtitle">Signed in as <span data-testid="account-username-text">&mdash;</span></p>
+
+      <div id="alerts"></div>
+
+      <div class="metrics" data-testid="account-metrics">
+        <div class="metric">
+          <div class="label">Account number</div>
+          <div class="value" data-testid="account-number-text">&mdash;</div>
+        </div>
+        <div class="metric">
+          <div class="label">Currency</div>
+          <div class="value" data-testid="account-currency-text">&mdash;</div>
+        </div>
+        <div class="metric">
+          <div class="label">Balance</div>
+          <div class="value" data-testid="account-balance-text">&mdash;</div>
+        </div>
+        <div class="metric">
+          <div class="label">Type</div>
+          <div class="value" data-testid="account-type-text">&mdash;</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    Ui.chrome('account');
+    const alerts = document.getElementById('alerts');
+
+    (async () => {
+      if (!Ui.requireSession()) return;
+
+      document.querySelector('[data-testid="account-username-text"]').textContent = Api.username();
+
+      const { ok, payload } = await Api.get('/api/accounts/me');
+      if (!ok) {
+        Ui.alert(alerts, 'error', payload?.message ?? 'Unable to load account.');
+        return;
+      }
+
+      const set = (testid, value) =>
+        document.querySelector(`[data-testid="${testid}"]`).textContent = value;
+
+      set('account-number-text', payload.accountNumber);
+      set('account-currency-text', payload.currency);
+      set('account-balance-text', Ui.money(payload.balance, payload.currency));
+      set('account-type-text', payload.accountType);
+    })();
+  </script>
+</body>
+</html>

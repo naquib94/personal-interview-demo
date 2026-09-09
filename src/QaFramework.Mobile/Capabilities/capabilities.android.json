@@ -1,0 +1,47 @@
+{
+  // Android capabilities. Committed, and deliberately free of anything that identifies a real
+  // device, a real build artefact or a real account.
+  //
+  // Two values are intentionally empty:
+  //   platformVersion - empty matches whatever is attached, which is what a developer wants.
+  //                     A device pool with mixed OS versions would pin this per environment.
+  //   app             - no .apk is committed to this repository. A pipeline supplies the path
+  //                     from the build artefact it has just produced, via
+  //                     QA_Mobile__Device__App or by editing this file in the output directory.
+  //
+  // appPackage/appActivity are given for the demo application's notional native build. They let
+  // a session attach to an already-installed app instead of reinstalling on every run, which is
+  // the difference between a five-second and a fifty-second feedback loop.
+  "platformName": "Android",
+  "automationName": "UiAutomator2",
+  "deviceName": "Android Device",
+  "platformVersion": "",
+  "app": "",
+  "appPackage": "com.example.tradingdemo",
+  "appActivity": "com.example.tradingdemo.MainActivity",
+
+  // See DeviceCapabilities for why both resets are false: scenario isolation is the suite's
+  // responsibility, not the installer's, and inherited session state is what makes a suite pass
+  // in isolation and fail as a whole.
+  "noReset": false,
+  "fullReset": false,
+
+  // Comfortably longer than the longest gap between two commands. Too low, and the server tears
+  // down a session that was merely waiting on an assertion.
+  "newCommandTimeoutSeconds": 120,
+
+  // Keys here are written WITHOUT the "appium:" prefix, and the factory adds it. That is not
+  // cosmetic: Microsoft.Extensions.Configuration treats ':' as its key separator, so a JSON
+  // property literally named "appium:autoGrantPermissions" binds as a nested section and never
+  // reaches a Dictionary<string, string>. Stripping the prefix from the file and re-adding it in
+  // code is the smaller of the two evils.
+  "additional": {
+    // Granting permissions up front removes a system dialogue that is not part of any scenario
+    // under test and that appears only on a fresh install - the classic "passes locally, fails
+    // on a clean agent" failure.
+    "autoGrantPermissions": "true",
+
+    // Animations make waits race against the renderer for no benefit in an automated run.
+    "disableWindowAnimation": "true"
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in - Meridian Trading (demo)</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <main>
+    <div class="panel" style="max-width:420px;margin:60px auto">
+      <h1 data-testid="login-heading">Sign in</h1>
+      <p class="subtitle">Meridian Trading &mdash; demonstration environment</p>
+
+      <div id="alerts"></div>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" autocomplete="off"
+                 data-testid="login-username-input" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="off"
+                 data-testid="login-password-input" />
+        </div>
+        <button type="submit" data-testid="login-submit-button">Sign in</button>
+        <span class="spinner" data-testid="app-busy"></span>
+      </form>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    const alerts = document.getElementById('alerts');
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      Ui.clearAlert(alerts);
+
+      const username = document.querySelector('[data-testid="login-username-input"]').value;
+      const password = document.querySelector('[data-testid="login-password-input"]').value;
+
+      const { ok, payload } = await Api.post('/api/auth/login', { username, password });
+
+      if (!ok) {
+        Ui.alert(alerts, 'error', payload?.message ?? 'Sign in failed.', payload?.errors);
+        return;
+      }
+
+      Api.signIn(payload.token, payload.username);
+      window.location.href = '/account.html';
+    });
+  </script>
+</body>
+</html>

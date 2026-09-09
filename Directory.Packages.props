@@ -1,0 +1,61 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="Test runner">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageVersion Include="NUnit" Version="4.6.1" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.11.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="BDD">
+    <PackageVersion Include="Reqnroll.NUnit" Version="3.3.4" />
+  </ItemGroup>
+
+  <ItemGroup Label="Assertions">
+    <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Web automation">
+    <PackageVersion Include="Microsoft.Playwright" Version="1.61.0" />
+    <!-- Selenium is present for a single comparative example only; Playwright is the primary
+         web driver. See docs/design-decisions.md. Selenium Manager resolves the browser driver
+         at runtime, so no driver binary is pinned or committed. -->
+    <PackageVersion Include="Selenium.WebDriver" Version="4.47.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Mobile automation">
+    <PackageVersion Include="Appium.WebDriver" Version="8.3.2" />
+  </ItemGroup>
+
+  <ItemGroup Label="HTTP">
+    <PackageVersion Include="RestSharp" Version="114.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Schema validation">
+    <PackageVersion Include="JsonSchema.Net" Version="9.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Data">
+    <PackageVersion Include="Dapper" Version="2.1.72" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+    <PackageVersion Include="Bogus" Version="35.6.5" />
+  </ItemGroup>
+
+  <ItemGroup Label="Configuration">
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Reporting">
+    <PackageVersion Include="Allure.NUnit" Version="2.15.0" />
+    <PackageVersion Include="Allure.Net.Commons" Version="2.15.0" />
+  </ItemGroup>
+
+</Project>

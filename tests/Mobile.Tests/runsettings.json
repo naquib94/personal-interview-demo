@@ -1,0 +1,103 @@
+{
+  // ===================================================================================
+  // HOW the mobile suite tests. Committed, contains no secrets, identical everywhere.
+  // ===================================================================================
+  // WHERE it tests lives in Environment.*.json. That split is described in
+  // QaFramework.Core/Configuration/Settings.cs and it is what stops this file rotting.
+  //
+  // Every value here can be overridden by a QA_-prefixed environment variable, so switching a
+  // run needs no file edit:
+  //     QA_Mobile__Target=LocalAppium
+  //     QA_Mobile__Platform=IOS
+  //     QA_RunSettings__Timeouts__ElementMs=10000
+
+  // Local is the committed default, matching the other suites. Environment.Local.json is a
+  // committed settings file describing a developer machine; the git-ignored file a developer
+  // puts credentials in is Environment.Overrides.json, which is a different thing - see the
+  // note on naming in ConfigurationLoader.
+  "Environment": "Local",
+
+  "RunSettings": {
+    // Not used by this suite. RunSettings requires the section - the type is shared with the web
+    // suite, where it is the primary setting - and inventing a mobile-only copy of the type to
+    // avoid six unused lines would be a worse trade. Left at its defaults so that nobody reads a
+    // deliberate-looking value into it.
+    "Browser": {
+      "Name": "chromium",
+      "Headless": true
+    },
+
+    "Timeouts": {
+      // Higher than the web suite's across the board. Mobile automation is genuinely slower:
+      // every command is an HTTP round trip to a server that is itself talking to a device over
+      // ADB or USB, and an emulator under CI load is slower again. Reusing web timeouts here
+      // produces a suite that flakes for reasons that have nothing to do with the application.
+      "ElementMs": 10000,
+      "PageLoadMs": 30000,
+      "SubmitMs": 20000,
+
+      // Absence stays short. It is the one wait that always costs its full budget when the
+      // assertion passes, so paying mobile-sized latency for it on every negative check is a
+      // straight tax. See the note on TimeoutSettings.AbsenceMs.
+      "AbsenceMs": 3000,
+
+      "ApiRequestMs": 30000,
+      "EventualConsistencyMs": 20000,
+      "PollIntervalMs": 250,
+      "ApplicationStartupMs": 60000
+    },
+
+    "Evidence": {
+      "CaptureScreenshotOnFailure": true,
+      "CapturePageSourceOnFailure": true,
+
+      // No video. On mobile a screen recording is expensive to capture, large to store and
+      // almost always less useful than the page source, which names the elements a video only
+      // shows. Turned on deliberately for a specific investigation, not left on by default.
+      "RecordVideo": false,
+
+      "OutputDirectory": "evidence/mobile"
+    }
+  },
+
+  // ===================================================================================
+  // Mobile-specific settings. Bound by QaFramework.Mobile.Capabilities.MobileSettingsLoader.
+  // ===================================================================================
+  "Mobile": {
+    "Platform": "Android",
+
+    // The committed default, and what CI uses. No device, no emulator and no Appium server is
+    // involved; the suite drives an in-memory fixture. This proves the framework's wiring and
+    // proves nothing about any application - see the class comment on SimulatedMobileDriver.
+    //
+    // Change to LocalAppium (with a server and a device) and the identical feature files,
+    // step definitions and screen objects run against real hardware. That is the point of the
+    // IMobileDriver seam, and it is why the target is one setting rather than a code branch.
+    "Target": "Simulated",
+
+    "AppiumServerUrl": "http://127.0.0.1:4723/",
+    "CapabilitiesDirectory": "Capabilities",
+    "SimulationFixture": "Simulation/Fixtures/trading-app.json",
+
+    // Two minutes. A cold emulator boot plus an app install routinely takes more than a minute,
+    // and this budget is deliberately separate from the element and page-load timeouts: sharing
+    // them would force a choice between flaky session starts and absurdly long element waits.
+    "SessionStartupMs": 120000,
+
+    // Names of environment variables, never values. There is no default URL, user or key
+    // anywhere in the code, and requesting the CloudGrid target without these set fails
+    // immediately with a message naming each missing variable. See CloudGridSettings.
+    "CloudGrid": {
+      "UrlVariable": "QA_MOBILE_GRID_URL",
+      "UserNameVariable": "QA_MOBILE_GRID_USERNAME",
+      "AccessKeyVariable": "QA_MOBILE_GRID_ACCESS_KEY",
+
+      // Descriptive labels only, so a grid's session list is navigable. A credential must never
+      // be routed through here.
+      "SessionMetadata": {
+        "projectName": "Trading Demo",
+        "buildName": "mobile-regression"
+      }
+    }
+  }
+}

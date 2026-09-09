@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Api.Tests</RootNamespace>
+    <!-- Inherits the NUnit runner, adapter and assertion library from Directory.Build.props,
+         so every suite is guaranteed to be configured identically. -->
+    <IsTestSuite>true</IsTestSuite>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Reqnroll.NUnit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TradingDemo.AppModel\TradingDemo.AppModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Configuration lives beside the assembly at runtime. ConfigurationLoader reads from
+         AppContext.BaseDirectory, so these must be copied. -->
+    <None Update="runsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Environment.*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="reqnroll.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

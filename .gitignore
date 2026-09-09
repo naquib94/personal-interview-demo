@@ -1,0 +1,77 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+
+## Reqnroll's generated code-behind.
+## Directory.Build.targets sends these to obj/, so this pattern is belt and braces for anyone
+## building with an older Reqnroll or an IDE that regenerates them in place. Committing them
+## means they go stale, and a stale code-behind is a test that no longer matches its feature file.
+**/Features/*.feature.cs
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+
+## Test output, reports and evidence
+TestResults/
+test-results/
+allure-results/
+allure-report/
+reports/
+evidence/
+**/evidence/screenshots/
+**/evidence/recordings/
+*.trx
+coverage*.xml
+coverage*.json
+
+## Playwright
+.playwright/
+playwright-report/
+**/playwright.ps1
+**/.ms-playwright/
+
+## Local databases (schema + seed scripts are committed; the built database is not)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## Local configuration overrides.
+## Environment.Overrides.json is the only place a developer should ever put a credential, and it
+## is deliberately never committed. Environment.Overrides.example.json IS committed as a
+## template. Note this is NOT Environment.Local.json - that is the committed settings file for
+## the "Local" environment, which is a different thing.
+**/Environment.Overrides.json
+**/appsettings.Local.json
+.env
+.env.*
+!.env.example
+
+## Secrets - defensive belt-and-braces. Nothing matching these should ever exist in this repo.
+*.pfx
+*.p12
+*.pem
+*.key
+!database/**/*.key
+secrets.json
+
+## Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+## Node (used only by the Allure CLI in CI)
+node_modules/
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini

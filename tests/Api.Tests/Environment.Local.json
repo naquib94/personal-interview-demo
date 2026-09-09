@@ -1,0 +1,57 @@
+{
+  // ==========================================================================================
+  // WHERE we test: a developer machine.
+  // ==========================================================================================
+  // The suite starts the demo application itself and points at its own instance, so a local run
+  // needs no setup beyond `dotnet build`.
+  //
+  // On the passwords below. These are the throwaway credentials of the demo application's own
+  // seeded accounts (see database/seed/002_seed.sql). They grant access to nothing except a
+  // SQLite file on your own machine, and committing them is what makes `dotnet test` work
+  // immediately after a clone.
+  //
+  // This is a narrow exception, not the pattern. On a real product these values would be absent
+  // here and supplied either through the git-ignored Environment.Overrides.json or, in CI, as
+  // QA_Users__ActiveTrader__Password. The loader deliberately FAILS rather than defaulting when
+  // a password is missing - see ConfigurationLoader.ValidateUsers for why an empty default is
+  // worse than a hard failure. See also SECURITY_REVIEW.md.
+  // ==========================================================================================
+
+  "BaseUrl": "http://localhost:5199",
+  "StartApplicationUnderTest": true,
+
+  // Where this suite's application instance keeps its database, and where the verification
+  // queries read from. Relative to the test assembly's output directory.
+  //
+  // Each suite has its own port AND its own database file, so the API and UI suites own separate
+  // application instances. That is what lets them run concurrently: both suites call
+  // /test-support/reset, so sharing one database would mean each suite periodically wiping the
+  // other's data - and sharing one process meant the first suite to finish killed it underneath
+  // the others.
+  "DatabasePath": "api-suite.db",
+
+  // Users are addressed by ROLE, never by name. Scenarios say "an active trader is signed in",
+  // so the Gherkin describes a business actor and the credential lives in exactly one place.
+  "Users": {
+    "ActiveTrader": {
+      "Username": "trader.demo",
+      "Password": "Demo!Pass123",
+      "Description": "Active user with a funded USD account and existing order history."
+    },
+    "SecondTrader": {
+      "Username": "trader.active",
+      "Password": "Demo!Pass123",
+      "Description": "A second active user, used to prove one account cannot read another's orders."
+    },
+    "SuspendedTrader": {
+      "Username": "trader.suspended",
+      "Password": "Demo!Pass123",
+      "Description": "Suspended user. Authentication succeeds but access is refused with 403."
+    },
+    "UserWithoutAccount": {
+      "Username": "analyst.readonly",
+      "Password": "Demo!Pass123",
+      "Description": "Active user with no trading account, so account and order endpoints return 404."
+    }
+  }
+}

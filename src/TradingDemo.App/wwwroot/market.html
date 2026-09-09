@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Market - Meridian Trading (demo)</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <main>
+    <div class="panel">
+      <h1 data-testid="market-heading">Market</h1>
+      <p class="subtitle">Indicative prices for the demonstration environment</p>
+
+      <div id="alerts"></div>
+
+      <div class="field" style="max-width:260px">
+        <label for="asset-class">Asset class</label>
+        <select id="asset-class" data-testid="market-asset-class-select">
+          <option value="">All</option>
+          <option value="FX">FX</option>
+          <option value="Metal">Metal</option>
+          <option value="Index">Index</option>
+          <option value="Crypto">Crypto</option>
+        </select>
+      </div>
+
+      <table data-testid="market-grid">
+        <thead>
+          <tr>
+            <th>Symbol</th><th>Name</th><th>Class</th>
+            <th>Bid</th><th>Ask</th><th>Spread</th><th>Tradable</th>
+          </tr>
+        </thead>
+        <tbody data-testid="market-grid-body"></tbody>
+      </table>
+      <div class="empty-state hidden" data-testid="market-grid-empty">No instruments match the filter.</div>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    Ui.chrome('market');
+    const alerts = document.getElementById('alerts');
+    const body = document.querySelector('[data-testid="market-grid-body"]');
+    const empty = document.querySelector('[data-testid="market-grid-empty"]');
+
+    async function load() {
+      if (!Ui.requireSession()) return;
+      Ui.clearAlert(alerts);
+
+      const assetClass = document.querySelector('[data-testid="market-asset-class-select"]').value;
+      const query = assetClass ? `?assetClass=${encodeURIComponent(assetClass)}` : '';
+      const { ok, payload } = await Api.get(`/api/instruments${query}`);
+
+      if (!ok) {
+        Ui.alert(alerts, 'error', payload?.message ?? 'Unable to load instruments.');
+        return;
+      }
+
+      // Rows carry data-symbol so the framework can address a row by business key rather than
+      // by index. Index-based row addressing breaks the moment sort order or data changes.
+      body.innerHTML = payload.map(i => `
+        <tr data-testid="market-grid-row" data-symbol="${i.symbol}">
+          <td data-field="symbol">${i.symbol}</td>
+          <td data-field="displayName">${i.displayName}</td>
+          <td data-field="assetClass">${i.assetClass}</td>
+          <td data-field="bid">${i.bid}</td>
+          <td data-field="ask">${i.ask}</td>
+          <td data-field="spread">${i.spread.toFixed(5)}</td>
+          <td data-field="isTradable">${i.isTradable ? 'Yes' : 'No'}</td>
+        </tr>`).join('');
+
+      empty.classList.toggle('hidden', payload.length > 0);
+    }
+
+    document.querySelector('[data-testid="market-asset-class-select"]')
+      .addEventListener('change', load);
+
+    load();
+  </script>
+</body>
+</html>

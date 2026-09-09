@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QaFramework.Web</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    Generic web components and browser lifecycle. Contains no page objects and no knowledge of
+    the trading domain - a component knows how to operate "a button", never "the Place Order
+    button". The application's screens live in TradingDemo.AppModel.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QaFramework.Core\QaFramework.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,43 @@
+{
+  // ==========================================================================================
+  // WHERE we test: a CI agent.
+  // ==========================================================================================
+  // Structurally identical to Environment.Local.json, which is the point: if the two files had
+  // different shapes, a change that worked locally could fail only in CI, at the least
+  // convenient moment.
+  //
+  // The differences are deliberate and few:
+  //   * The database path uses the Release output, matching how CI builds.
+  //   * Passwords are still the demo's seeded values because the demo application is built and
+  //     seeded by the pipeline itself. On a real product this file would carry NO passwords and
+  //     the pipeline would inject QA_Users__ActiveTrader__Password from its secret store.
+  // ==========================================================================================
+
+  "BaseUrl": "http://localhost:5199",
+  "StartApplicationUnderTest": true,
+
+  "DatabasePath": "api-suite.db",
+
+  "Users": {
+    "ActiveTrader": {
+      "Username": "trader.demo",
+      "Password": "Demo!Pass123",
+      "Description": "Active user with a funded USD account and existing order history."
+    },
+    "SecondTrader": {
+      "Username": "trader.active",
+      "Password": "Demo!Pass123",
+      "Description": "A second active user, used to prove one account cannot read another's orders."
+    },
+    "SuspendedTrader": {
+      "Username": "trader.suspended",
+      "Password": "Demo!Pass123",
+      "Description": "Suspended user. Authentication succeeds but access is refused with 403."
+    },
+    "UserWithoutAccount": {
+      "Username": "analyst.readonly",
+      "Password": "Demo!Pass123",
+      "Description": "Active user with no trading account, so account and order endpoints return 404."
+    }
+  }
+}

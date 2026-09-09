@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schemas.reqnroll.net/reqnroll-config-latest.json",
+
+  // The shared lifecycle hooks and step definitions live in TradingDemo.AppModel. Listing the
+  // assembly here is what makes Reqnroll discover them, and is the mechanism that lets three
+  // suites share one application model instead of copying hooks between them.
+  "bindingAssemblies": [
+    { "assembly": "TradingDemo.AppModel" }
+  ],
+
+  "language": {
+    "feature": "en"
+  }
+}

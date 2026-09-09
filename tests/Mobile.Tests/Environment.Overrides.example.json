@@ -1,0 +1,30 @@
+{
+  // ===================================================================================
+  // Template for a per-developer environment file. COMMITTED; the real one is not.
+  // ===================================================================================
+  // Copy this to Environment.Local.json and edit it. That file is git-ignored (see .gitignore)
+  // and is the only place in this repository a developer should put a credential.
+  //
+  // It is loaded twice over, in two different roles, and knowing which is which saves confusion:
+  //   * with QA_ENVIRONMENT=Local it is the environment file itself;
+  //   * with any other environment it is layered on top as an optional override.
+  // So a value set here wins over Environment.Ci.json unless an environment variable overrides
+  // both.
+
+  "BaseUrl": "http://127.0.0.1:5185",
+  "StartApplicationUnderTest": false,
+  "DatabasePath": "",
+
+  "Users": {
+    "ActiveTrader": {
+      "Username": "trader.demo",
+      "Password": "Demo!Pass123",
+      "Description": "An active trader with a funded demo account and existing order history."
+    },
+    "SuspendedTrader": {
+      "Username": "trader.suspended",
+      "Password": "Demo!Pass123",
+      "Description": "Suspended account, for negative authorisation paths."
+    }
+  }
+}

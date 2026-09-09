@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Unit tests for the test framework itself.
+
+    A test framework is production code for the QA team. If Wait.ForValueAsync has an
+    off-by-one, or the configuration precedence chain silently ignores an environment variable,
+    the result is not a broken test - it is a suite that reports the wrong answer confidently.
+    None of the four reference frameworks this project learned from had a single test of their
+    own framework code. This project does, and that gap is one of its deliberate
+    differentiators. See SuiteOverview.cs for the full rationale and the coverage map.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Framework.Tests</RootNamespace>
+
+    <!-- Inherits the shared runner setup from Directory.Build.props: NUnit, the test SDK, the
+         analysers and AwesomeAssertions. Declaring them here as well is how suites drift apart. -->
+    <IsTestSuite>true</IsTestSuite>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\QaFramework.Core\QaFramework.Core.csproj" />
+    <ProjectReference Include="..\..\src\QaFramework.Api\QaFramework.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Both are used directly by tests rather than pulled in transitively: the database tests
+         build a real SQLite file to prove the read-only guard holds at the driver as well as in
+         the guard clause, and the request-builder tests inspect the RestRequest that
+         ApiRequestBuilder.Build produces. Declaring a direct dependency explicitly is what
+         stops a future refactor of the framework's own references from silently breaking the
+         build here. -->
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="RestSharp" />
+  </ItemGroup>
+
+  <!--
+    Deliberately no settings files are copied to the output directory. Every configuration test
+    writes its own runsettings.json / Environment.*.json into a temporary directory and deletes
+    them again, so the tests describe the exact file content they depend on instead of asserting
+    against a committed fixture that a later edit could quietly change the meaning of.
+  -->
+
+</Project>

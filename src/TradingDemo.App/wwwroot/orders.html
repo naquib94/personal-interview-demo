@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order history - Meridian Trading (demo)</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <main>
+    <div class="panel">
+      <h1 data-testid="order-history-heading">Order history</h1>
+      <p class="subtitle">All orders placed on this account</p>
+
+      <div id="alerts"></div>
+
+      <div class="row" style="max-width:520px">
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status" data-testid="order-history-status-select">
+            <option value="">All</option>
+            <option value="Filled">Filled</option>
+            <option value="Pending">Pending</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="search">Reference contains</label>
+          <input id="search" type="text" autocomplete="off" data-testid="order-history-search-input" />
+        </div>
+      </div>
+
+      <table data-testid="order-history-grid">
+        <thead>
+          <tr>
+            <th>Reference</th><th>Symbol</th><th>Side</th>
+            <th>Type</th><th>Quantity</th><th>Limit</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody data-testid="order-history-grid-body"></tbody>
+      </table>
+
+      <div class="empty-state hidden" data-testid="order-history-grid-empty">No orders match the filter.</div>
+
+      <p class="subtitle" style="margin-top:16px">
+        Showing <span data-testid="order-history-row-count-text">0</span>
+        of <span data-testid="order-history-total-count-text">0</span> orders
+      </p>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    Ui.chrome('order-history');
+    const alerts = document.getElementById('alerts');
+    const body = document.querySelector('[data-testid="order-history-grid-body"]');
+    const empty = document.querySelector('[data-testid="order-history-grid-empty"]');
+
+    const pillClass = (status) => `pill pill-${status.toLowerCase()}`;
+
+    async function load() {
+      if (!Ui.requireSession()) return;
+      Ui.clearAlert(alerts);
+
+      const status = document.querySelector('[data-testid="order-history-status-select"]').value;
+      const search = document.querySelector('[data-testid="order-history-search-input"]').value.trim().toUpperCase();
+
+      const query = new URLSearchParams({ pageSize: '100' });
+      if (status) query.set('status', status);
+
+      const { ok, payload } = await Api.get(`/api/orders?${query}`);
+      if (!ok) {
+        Ui.alert(alerts, 'error', payload?.message ?? 'Unable to load order history.');
+        return;
+      }
+
+      const rows = search
+        ? payload.items.filter(o => o.orderReference.toUpperCase().includes(search))
+        : payload.items;
+
+      body.innerHTML = rows.map(o => `
+        <tr data-testid="order-history-grid-row" data-reference="${o.orderReference}">
+          <td data-field="orderReference">${o.orderReference}</td>
+          <td data-field="symbol">${o.symbol}</td>
+          <td data-field="side" class="side-${o.side.toLowerCase()}">${o.side}</td>
+          <td data-field="orderType">${o.orderType}</td>
+          <td data-field="quantity">${o.quantity}</td>
+          <td data-field="limitPrice">${o.limitPrice ?? '-'}</td>
+          <td data-field="status"><span class="${pillClass(o.status)}">${o.status}</span></td>
+        </tr>`).join('');
+
+      empty.classList.toggle('hidden', rows.length > 0);
+
+      document.querySelector('[data-testid="order-history-row-count-text"]').textContent = rows.length;
+      document.querySelector('[data-testid="order-history-total-count-text"]').textContent = payload.totalCount;
+    }
+
+    document.querySelector('[data-testid="order-history-status-select"]').addEventListener('change', load);
+    document.querySelector('[data-testid="order-history-search-input"]').addEventListener('input', load);
+
+    load();
+  </script>
+</body>
+</html>

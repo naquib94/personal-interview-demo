@@ -1,0 +1,50 @@
+{
+  // ==========================================================================================
+  // HOW we test. Identical in every environment.
+  // ==========================================================================================
+  // The counterpart file is Environment.{Name}.json, which says WHERE we test. Keeping the two
+  // apart is what makes it obvious which values are safe to change: nothing in this file can
+  // point the suite at the wrong system.
+  //
+  // "Environment" selects the environment file, and is overridden by the QA_ENVIRONMENT
+  // environment variable. Precedence is documented in QaFramework.Core/ConfigurationLoader.cs
+  // and covered by unit tests in Framework.Tests/Configuration.
+  // ==========================================================================================
+
+  "Environment": "Local",
+
+  "RunSettings": {
+    "Browser": {
+      // Unused by this suite - the API tests never open a browser - but present because the
+      // schema is shared across all three suites. One binding model beats three near-identical
+      // ones that drift apart.
+      "Name": "chromium",
+      "Channel": "",
+      "Headless": true,
+      "ViewportWidth": 1920,
+      "ViewportHeight": 1080,
+      "SlowMotionMs": 0
+    },
+
+    "Timeouts": {
+      // Every value is documented in QaFramework.Core/Configuration/TimeoutSettings.cs with the
+      // reason it has that magnitude. Tune here for a slow agent; never inline a literal in a
+      // page object or a step.
+      "ElementMs": 5000,
+      "PageLoadMs": 15000,
+      "SubmitMs": 10000,
+      "AbsenceMs": 2000,
+      "ApiRequestMs": 30000,
+      "EventualConsistencyMs": 20000,
+      "PollIntervalMs": 250,
+      "ApplicationStartupMs": 60000
+    },
+
+    "Evidence": {
+      "CaptureScreenshotOnFailure": true,
+      "CapturePageSourceOnFailure": true,
+      "RecordVideo": false,
+      "OutputDirectory": "evidence"
+    }
+  }
+}

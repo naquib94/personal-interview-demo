@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>TradingDemo.App</RootNamespace>
+    <AssemblyName>TradingDemo.App</AssemblyName>
+    <!-- The test suites start this application in-process, so it must be referencable as a
+         library as well as runnable as an executable. -->
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The SQL scripts are the single source of truth for the schema and seed. They are linked
+         in from database/ rather than duplicated, so the files the tests validate against are
+         literally the files a reviewer reads. -->
+    <Content Include="..\..\database\schema\*.sql" Link="Database\Schema\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\database\seed\*.sql"   Link="Database\Seed\%(Filename)%(Extension)"   CopyToOutputDirectory="PreserveNewest" />
+
+    <!--
+      The Web SDK globs wwwroot as content but only stages it for `publish`, not for `build`.
+      That is fine for `dotnet run`, where the content root is the project directory, but this
+      application is launched by the test harness as `dotnet bin/.../TradingDemo.App.dll` - and
+      then the content root is the output directory, wwwroot is absent, and every page returns
+      404 with an empty body.
+
+      That produced a genuinely misleading failure: Playwright reported "element not found" on a
+      blank page, which reads like a locator problem rather than a missing static-files problem.
+      Copying wwwroot on build is one line and removes the whole class of confusion.
+    -->
+    <Content Update="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

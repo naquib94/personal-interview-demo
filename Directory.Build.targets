@@ -1,0 +1,37 @@
+<Project>
+
+  <!--
+    Properties that must override a default set by a NuGet package's own .props file.
+
+    MSBuild imports in this order for an SDK-style project:
+
+        Sdk.props  ->  Directory.Build.props  ->  package *.props  ->  <project body>
+                   ->  Sdk.targets  ->  Directory.Build.targets  ->  package *.targets
+
+    Anything a package's .props file defaults therefore wins over Directory.Build.props, and
+    setting it there has no effect at all. Directory.Build.targets is imported after the project
+    body, so it is the right central home for these.
+
+    This cost a small amount of confusion when the setting below was first placed in
+    Directory.Build.props: the property reported as "false" rather than as empty, which was the
+    clue that something was actively overriding it rather than that the condition had not matched.
+  -->
+  <PropertyGroup Condition="'$(IsTestSuite)' == 'true'">
+
+    <!--
+      Reqnroll's generated code-behind goes to obj/ rather than sitting beside the .feature files.
+      Reqnroll defaults this to false in its own .props.
+
+      Two reasons, and the first is the one that matters:
+        * obj/ is already git-ignored, so a generated file can never be committed or reviewed by
+          accident. Left in place they do get committed, then they go stale, and eventually
+          somebody spends an afternoon debugging a test that no longer matches its feature file.
+        * A reader browsing Features/ sees five feature files rather than ten, half of which are
+          machine output.
+    -->
+    <ReqnrollUseIntermediateOutputPathForCodeBehind>true</ReqnrollUseIntermediateOutputPathForCodeBehind>
+    <ReqnrollDeleteObsoleteCodeBehindFilesOnClean>true</ReqnrollDeleteObsoleteCodeBehindFilesOnClean>
+
+  </PropertyGroup>
+
+</Project>

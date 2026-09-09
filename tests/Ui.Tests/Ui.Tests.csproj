@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Ui.Tests</RootNamespace>
+    <IsTestSuite>true</IsTestSuite>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Reqnroll.NUnit" />
+    <!--
+      Selenium appears in this project for exactly one comparative example
+      (Selenium/SeleniumComparisonTests.cs). Playwright is the primary web driver; the reasoning
+      is in docs/design-decisions.md. The Selenium tests are tagged so CI can exclude them,
+      because they require a locally installed Chrome that a minimal agent may not have.
+    -->
+    <PackageReference Include="Selenium.WebDriver" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TradingDemo.AppModel\TradingDemo.AppModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="runsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Environment.*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="reqnroll.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

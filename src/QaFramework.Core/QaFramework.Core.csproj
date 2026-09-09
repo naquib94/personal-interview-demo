@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QaFramework.Core</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    QaFramework.Core is the bottom of the dependency graph. It knows nothing about Playwright,
+    Appium, HTTP or the application under test, and it deliberately does not reference a test
+    runner: everything in here must be usable from any suite, and unit-testable on its own.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+  </ItemGroup>
+
+</Project>

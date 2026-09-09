@@ -1,0 +1,204 @@
+{
+  // ===================================================================================
+  // Simulated trading application - the in-memory stand-in for a native mobile client.
+  // ===================================================================================
+  //
+  // This file is a TEST DOUBLE, not a specification. It answers exactly what it is told to
+  // answer. A scenario passing against it demonstrates that the framework's wiring works -
+  // configuration, locators, screen objects, waits, hooks, evidence, reporting - and demonstrates
+  // nothing whatsoever about whether a real application behaves correctly. See the class comment
+  // on SimulatedMobileDriver for the full statement of that boundary.
+  //
+  // Selectors are the demo web application's data-testid values (see
+  // src/TradingDemo.App/wwwroot/*.html). That is deliberate: a native build of the same product
+  // would expose those same strings as accessibility identifiers, so the naming convention stays
+  // identical across the web, API and mobile suites and a reader only has to learn it once.
+  //
+  // Credentials appear NOWHERE in this file. The sign-in rule compares against "$expectedUsername"
+  // and "$expectedPassword", which the suite's hook supplies from the same configuration chain
+  // every other suite uses. An unresolved token is a hard failure - see SimulationTokens.
+  "initialScreen": "login",
+
+  // Navigation chrome, declared once. Repeating it per screen is how fixtures drift.
+  "sharedElements": [
+    {
+      "appliesToScreens": [ "account", "market", "new-order", "order-history" ],
+      "elements": [
+        {
+          "selector": "nav-account-link",
+          "text": "Account",
+          "onTap": { "rules": [ { "navigateTo": "account" } ] }
+        },
+        {
+          "selector": "nav-market-link",
+          "text": "Market",
+          "onTap": { "rules": [ { "navigateTo": "market" } ] }
+        },
+        {
+          "selector": "nav-new-order-link",
+          "text": "New order",
+          "onTap": { "rules": [ { "navigateTo": "new-order" } ] }
+        },
+        {
+          "selector": "nav-order-history-link",
+          "text": "Order history",
+          "onTap": { "rules": [ { "navigateTo": "order-history" } ] }
+        }
+      ]
+    }
+  ],
+
+  "screens": [
+    {
+      "name": "login",
+      "elements": [
+        { "selector": "login-heading", "text": "Sign in" },
+        { "selector": "login-username-input", "isInput": true },
+        { "selector": "login-password-input", "isInput": true },
+
+        // The error message starts hidden and its text is fixed. Wording it here rather than in
+        // the step definition means the assertion compares the screen against the fixture, not
+        // the step definition against itself.
+        {
+          "selector": "login-error-text",
+          "text": "Sign in failed. Check your username and password.",
+          "visible": false
+        },
+        {
+          "selector": "login-submit-button",
+          "text": "Sign in",
+          "onTap": {
+            // First match wins, so the success rule is stated first and the failure rule needs no
+            // negated conditions. The last rule has no conditions and is therefore the default.
+            "rules": [
+              {
+                "when": [
+                  { "selector": "login-username-input", "condition": "EqualTo", "value": "$expectedUsername" },
+                  { "selector": "login-password-input", "condition": "EqualTo", "value": "$expectedPassword" }
+                ],
+                "navigateTo": "account",
+                "hide": [ "login-error-text" ],
+                // The account screen shows whoever signed in, copied from what was typed. A
+                // hardcoded name here would let a locator pointing at the wrong field still pass.
+                "setTexts": { "account-username-text": "{text:login-username-input}" }
+              },
+              {
+                "show": [ "login-error-text" ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "account",
+      // Values mirror the shape of the seeded demo account (see database/seed/002_seed.sql) so
+      // that a reader recognises the domain. They are static: this screen has no behaviour.
+      "elements": [
+        // The one element whose identifier deliberately differs between platforms. Real projects
+        // always end up with a handful of these, and having one here means MobileLocator's
+        // platform-pair resolution is actually executed rather than merely available: run the
+        // suite as iOS and this element only resolves if the pair is honoured.
+        { "selector": "account-heading", "iosSelector": "accountHeading", "text": "Account" },
+        { "selector": "account-username-text", "text": "" },
+        { "selector": "account-number-text", "text": "DEMO-1000001" },
+        { "selector": "account-currency-text", "text": "USD" },
+        { "selector": "account-balance-text", "text": "25000.00" },
+        { "selector": "account-type-text", "text": "Demo" }
+      ]
+    },
+
+    {
+      "name": "market",
+      "elements": [
+        { "selector": "market-heading", "text": "Market" },
+        { "selector": "market-asset-class-select", "text": "All", "isInput": true },
+        {
+          "selector": "market-grid-row",
+          "isList": true,
+          "items": [
+            "EURUSD | Euro / US Dollar | 1.08420 | 1.08435",
+            "GBPUSD | British Pound / US Dollar | 1.26510 | 1.26529",
+            "XAUUSD | Gold / US Dollar | 2318.40000 | 2318.75000"
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "new-order",
+      "elements": [
+        { "selector": "new-order-heading", "text": "New order" },
+
+        // The selects are modelled as inputs whose text is the chosen value. This is an admitted
+        // shortcut: a native picker is a scroll-and-select interaction, not a text entry, and a
+        // real driver would need Gestures. Modelling the picker faithfully would add fixture
+        // machinery that proves nothing about the framework, so the value is set directly and the
+        // shortcut is written down here rather than hidden.
+        { "selector": "new-order-symbol-select", "text": "EURUSD", "isInput": true },
+        { "selector": "new-order-side-select", "text": "Buy", "isInput": true },
+        { "selector": "new-order-type-select", "text": "Market", "isInput": true },
+        { "selector": "new-order-quantity-input", "text": "", "isInput": true },
+
+        // Hidden until the order type is Limit, exactly as in the web application. Present so the
+        // "conditional field" locator path is exercised rather than only described.
+        { "selector": "new-order-limit-price-input", "text": "", "isInput": true, "visible": false },
+
+        { "selector": "new-order-error-text", "text": "", "visible": false },
+        { "selector": "new-order-reference-text", "text": "", "visible": false },
+
+        {
+          "selector": "new-order-submit-button",
+          "text": "Place order",
+          "onTap": {
+            "rules": [
+              {
+                // Validation first. The real API rejects a missing quantity, so the double does
+                // too - otherwise the negative scenario would have to be written against the API
+                // suite and the mobile suite would only ever exercise the happy path.
+                "when": [ { "selector": "new-order-quantity-input", "condition": "Empty" } ],
+                "setTexts": { "new-order-error-text": "Quantity is required." },
+                "show": [ "new-order-error-text" ],
+                "hide": [ "new-order-reference-text" ]
+              },
+              {
+                // Success. The generated reference is written to the confirmation element AND
+                // appended to the order history in one rule, so the two can never disagree -
+                // which is the whole point of the scenario that checks they agree.
+                "setTexts": { "new-order-reference-text": "{reference}" },
+                "show": [ "new-order-reference-text" ],
+                "hide": [ "new-order-error-text" ],
+                "appendToList": {
+                  "selector": "order-history-grid-row",
+                  "template": "{reference} | {text:new-order-symbol-select} | {text:new-order-side-select} | {text:new-order-quantity-input} | Filled"
+                },
+                "clearTexts": [ "new-order-quantity-input" ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "order-history",
+      "elements": [
+        { "selector": "order-history-heading", "text": "Order history" },
+        { "selector": "order-history-search-input", "text": "", "isInput": true },
+        { "selector": "order-history-grid-empty", "text": "No orders match the current filter.", "visible": false },
+        {
+          "selector": "order-history-grid-row",
+          "isList": true,
+          // Pre-existing rows, shaped like the seed data. They matter: a scenario that asserts a
+          // new order "appears" in an empty list proves much less than one that finds it among
+          // rows that were already there.
+          "items": [
+            "ORD-20240401-0001 | EURUSD | Buy | 1.00 | Filled",
+            "ORD-20240401-0002 | GBPUSD | Sell | 2.00 | Pending"
+          ]
+        }
+      ]
+    }
+  ]
+}

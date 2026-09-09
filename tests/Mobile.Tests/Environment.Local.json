@@ -1,0 +1,26 @@
+{
+  // ===================================================================================
+  // Per-developer environment file. GIT-IGNORED - see .gitignore. Do not commit.
+  // ===================================================================================
+  // Generated from Environment.Local.example.json so that a local `dotnet test` works with
+  // QA_ENVIRONMENT=Local as well as with the committed Ci default. Because it is git-ignored, a
+  // fresh clone will not have it, which is why the test project includes it conditionally and
+  // why Ci is the committed default environment.
+
+  "BaseUrl": "http://127.0.0.1:5185",
+  "StartApplicationUnderTest": false,
+  "DatabasePath": "",
+
+  "Users": {
+    "ActiveTrader": {
+      "Username": "trader.demo",
+      "Password": "Demo!Pass123",
+      "Description": "An active trader with a funded demo account and existing order history."
+    },
+    "SuspendedTrader": {
+      "Username": "trader.suspended",
+      "Password": "Demo!Pass123",
+      "Description": "Suspended account, for negative authorisation paths."
+    }
+  }
+}

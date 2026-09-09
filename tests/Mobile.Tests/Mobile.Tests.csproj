@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Mobile.Tests</RootNamespace>
+
+    <!-- Inherits the shared runner setup from Directory.Build.props: NUnit, the test SDK, the
+         analysers, AwesomeAssertions, and the Reqnroll code-behind output location. Declaring
+         any of them here as well is how suites drift apart. -->
+    <IsTestSuite>true</IsTestSuite>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\QaFramework.Core\QaFramework.Core.csproj" />
+    <ProjectReference Include="..\..\src\QaFramework.Mobile\QaFramework.Mobile.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Reqnroll.NUnit" />
+  </ItemGroup>
+
+  <!--
+    Settings files are copied rather than embedded, because ConfigurationLoader reads them from
+    the output directory by path. PreserveNewest rather than Always: an unchanged file does not
+    need recopying on every build, and the difference is noticeable across several environments.
+  -->
+  <ItemGroup>
+    <None Update="runsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Environment.*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="reqnroll.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,51 @@
+{
+  // ===================================================================================
+  // WHERE the mobile suite tests, on a CI agent. Committed.
+  // ===================================================================================
+  // Bound to QaFramework.Core.Configuration.EnvironmentSettings. Values here are overridden by
+  // Environment.Local.json (git-ignored, optional) and then by QA_-prefixed environment
+  // variables, which is the only channel a real secret should ever use.
+
+  // Present because EnvironmentSettings requires it and because the API and web suites share the
+  // schema. The mobile suite in its committed configuration never makes an HTTP call: the
+  // Simulated target has no application under test at all. Left pointing at the demo
+  // application's local address so that a mobile run against a real device - which would need
+  // the API - has somewhere sensible to start from.
+  "BaseUrl": "http://127.0.0.1:5185",
+
+  // The mobile suite does not start the application. On a real device run the app is installed
+  // on the device and its API is wherever BaseUrl says; in the simulated run there is nothing to
+  // start. Either way, starting a web host here would be waste.
+  "StartApplicationUnderTest": false,
+
+  // Empty means "database verification is unavailable in this environment", which the database
+  // layer reports as an explicit error rather than crashing. The mobile suite asserts through the
+  // UI only; cross-checking the database is the API suite's job, where it belongs.
+  "DatabasePath": "",
+
+  "Users": {
+    "ActiveTrader": {
+      "Username": "trader.demo",
+
+      // On this password being committed. It is the demo seed's throwaway string, already present
+      // in database/seed/002_seed.sql with the same reasoning: it grants access to nothing except
+      // a local SQLite file, the accounts are inert, and the whole purpose of the application is
+      // to be signed into by an automated test.
+      //
+      // It is here rather than absent because ConfigurationLoader fails fast on a user with no
+      // password - correctly - and a public CI run has no secret store to draw from. In a real
+      // project this line would not exist and the value would arrive as
+      // QA_Users__ActiveTrader__Password from the pipeline's secret store; that override still
+      // works and still takes precedence, so nothing needs to change to adopt it.
+      "Password": "Demo!Pass123",
+
+      "Description": "An active trader with a funded demo account and existing order history."
+    },
+
+    "SuspendedTrader": {
+      "Username": "trader.suspended",
+      "Password": "Demo!Pass123",
+      "Description": "Suspended account. Present so negative authorisation paths have a home; not used by the simulated fixture, which models the sign-in screen only."
+    }
+  }
+}

@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>QaFramework.Api</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    Generic HTTP plumbing and response assertions. Knows nothing about the trading domain -
+    no endpoint paths, no DTOs, no business rules. Those live in TradingDemo.AppModel.
+    That boundary is what would let this project be reused unchanged against a second product.
+  -->
+  <ItemGroup>
+    <PackageReference Include="RestSharp" />
+    <PackageReference Include="JsonSchema.Net" />
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QaFramework.Core\QaFramework.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    Two members are internal by design and are the subject of unit tests in tests/Framework.Tests:
+
+      ApiRequestBuilder.Build(JsonSerializerOptions)  - assembles the RestRequest. Internal
+          because RestSharp must not leak past ApiClient; making it public to test it would
+          undo the layering the type exists to enforce.
+      ApiResponse<T>'s constructor                    - only ApiClient may construct a response,
+          so that a test cannot fabricate one and assert against a body no server ever sent.
+
+    Both behaviours are worth testing directly: null-dropping and invariant number formatting
+    are cross-machine bug classes, and lazy non-throwing deserialisation is what every
+    negative-path test depends on. The alternatives were to widen the API surface permanently,
+    or to drive every case through a real HTTP listener - which would test the transport
+    stack again rather than the logic in question, and add a socket to a unit test suite.
+    Granting one test assembly visibility is the smaller compromise, and it is visible here.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Framework.Tests" />
+  </ItemGroup>
+
+</Project>

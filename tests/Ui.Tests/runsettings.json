@@ -1,0 +1,63 @@
+{
+  // ==========================================================================================
+  // HOW we test. Identical in every environment.
+  // ==========================================================================================
+  // The counterpart file is Environment.{Name}.json, which says WHERE we test. Keeping the two
+  // apart is what makes it obvious which values are safe to change: nothing in this file can
+  // point the suite at the wrong system.
+  //
+  // "Environment" selects the environment file, and is overridden by the QA_ENVIRONMENT
+  // environment variable. Precedence is documented in QaFramework.Core/ConfigurationLoader.cs
+  // and covered by unit tests in Framework.Tests/Configuration.
+  // ==========================================================================================
+
+  "Environment": "Local",
+
+  "RunSettings": {
+    "Browser": {
+      // Headless is the committed default so that CI needs no configuration and a developer's
+      // first run does not steal window focus.
+      //
+      // To watch a scenario run - which is exactly what a demonstration needs - override it
+      // without editing this file:
+      //   $env:QA_RunSettings__Browser__Headless = "false"
+      //   $env:QA_RunSettings__Browser__SlowMotionMs = "300"
+      // SlowMotionMs inserts a pause between Playwright operations so a human can follow along.
+      // It is zero by default because it is a presentation aid, not a synchronisation tool -
+      // using it to "fix" a flaky test would hide the real problem.
+      "Name": "chromium",
+
+      // Empty uses Playwright's own bundled browser build, which keeps runs reproducible.
+      // Set to "chrome" or "msedge" to drive a browser already installed on the machine - see
+      // BrowserSettings.Channel for the two situations where that is genuinely needed, one of
+      // which is a corporate network that blocks Playwright's browser download.
+      "Channel": "",
+
+      "Headless": true,
+      "ViewportWidth": 1920,
+      "ViewportHeight": 1080,
+      "SlowMotionMs": 0
+    },
+
+    "Timeouts": {
+      // Every value is documented in QaFramework.Core/Configuration/TimeoutSettings.cs with the
+      // reason it has that magnitude. Tune here for a slow agent; never inline a literal in a
+      // page object or a step.
+      "ElementMs": 5000,
+      "PageLoadMs": 15000,
+      "SubmitMs": 10000,
+      "AbsenceMs": 2000,
+      "ApiRequestMs": 30000,
+      "EventualConsistencyMs": 20000,
+      "PollIntervalMs": 250,
+      "ApplicationStartupMs": 60000
+    },
+
+    "Evidence": {
+      "CaptureScreenshotOnFailure": true,
+      "CapturePageSourceOnFailure": true,
+      "RecordVideo": false,
+      "OutputDirectory": "evidence"
+    }
+  }
+}

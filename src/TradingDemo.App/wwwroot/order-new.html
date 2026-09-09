@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>New order - Meridian Trading (demo)</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <main>
+    <div class="panel">
+      <h1 data-testid="new-order-heading">New order</h1>
+      <p class="subtitle">Market orders fill immediately; limit orders rest until the price is reached.</p>
+
+      <div id="alerts"></div>
+
+      <form id="order-form" novalidate>
+        <div class="row">
+          <div class="field">
+            <label for="symbol">Instrument</label>
+            <select id="symbol" data-testid="new-order-symbol-select"></select>
+          </div>
+          <div class="field">
+            <label for="side">Side</label>
+            <select id="side" data-testid="new-order-side-select">
+              <option value="Buy">Buy</option>
+              <option value="Sell">Sell</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="orderType">Order type</label>
+            <select id="orderType" data-testid="new-order-type-select">
+              <option value="Market">Market</option>
+              <option value="Limit">Limit</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quantity">Quantity</label>
+            <input id="quantity" type="text" autocomplete="off" data-testid="new-order-quantity-input" />
+          </div>
+        </div>
+
+        <div class="field hidden" data-testid="new-order-limit-price-field">
+          <label for="limitPrice">Limit price</label>
+          <input id="limitPrice" type="text" autocomplete="off" data-testid="new-order-limit-price-input" />
+        </div>
+
+        <button type="submit" data-testid="new-order-submit-button">Place order</button>
+        <button type="reset" class="secondary" data-testid="new-order-reset-button">Reset</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script>
+    Ui.chrome('new-order');
+    const alerts = document.getElementById('alerts');
+    const typeSelect = document.querySelector('[data-testid="new-order-type-select"]');
+    const limitField = document.querySelector('[data-testid="new-order-limit-price-field"]');
+    const limitInput = document.querySelector('[data-testid="new-order-limit-price-input"]');
+
+    // The limit price field is conditional. That conditionality is itself a test case: the
+    // field must not be submitted for a market order, and the API rejects it if it is.
+    function syncLimitVisibility() {
+      const isLimit = typeSelect.value === 'Limit';
+      limitField.classList.toggle('hidden', !isLimit);
+      if (!isLimit) limitInput.value = '';
+    }
+    typeSelect.addEventListener('change', syncLimitVisibility);
+
+    (async () => {
+      if (!Ui.requireSession()) return;
+
+      const { ok, payload } = await Api.get('/api/instruments');
+      if (!ok) {
+        Ui.alert(alerts, 'error', payload?.message ?? 'Unable to load instruments.');
+        return;
+      }
+
+      // Non-tradable instruments are listed but disabled, so the UI prevents what the API
+      // would reject. Testing both layers separately is the point: the API rule must hold even
+      // if the UI guard is bypassed.
+      document.querySelector('[data-testid="new-order-symbol-select"]').innerHTML =
+        payload.map(i => `<option value="${i.symbol}" ${i.isTradable ? '' : 'disabled'}>
+            ${i.symbol} - ${i.displayName}${i.isTradable ? '' : ' (not tradable)'}
+          </option>`).join('');
+    })();
+
+    document.getElementById('order-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      Ui.clearAlert(alerts);
+
+      const quantityRaw = document.querySelector('[data-testid="new-order-quantity-input"]').value.trim();
+      const limitRaw = limitInput.value.trim();
+
+      const request = {
+        symbol: document.querySelector('[data-testid="new-order-symbol-select"]').value,
+        side: document.querySelector('[data-testid="new-order-side-select"]').value,
+        orderType: typeSelect.value,
+        quantity: quantityRaw === '' ? null : Number(quantityRaw),
+        limitPrice: limitRaw === '' ? null : Number(limitRaw)
+      };
+
+      const { ok, payload } = await Api.post('/api/orders', request);
+
+      if (!ok) {
+        Ui.alert(alerts, 'error', payload?.message ?? 'The order could not be placed.', payload?.errors);
+        return;
+      }
+
+      // The form is cleared BEFORE the success message is rendered, not after.
+      //
+      // The obvious ordering - show the message, then reset the form - has a subtle bug: reset()
+      // fires a 'reset' event, and the handler below clears the alert region so that pressing
+      // the Reset button dismisses a stale error. So resetting after rendering immediately
+      // erased the success message the user had just earned.
+      //
+      // It is worth noting how this was found. The defect is invisible to a human clicking
+      // through the page, because the message appears and disappears within a frame. It was
+      // found by an automated test asserting on the success alert, and the failure initially
+      // looked like a test problem rather than an application one.
+      document.getElementById('order-form').reset();
+      syncLimitVisibility();
+
+      Ui.alert(alerts, 'success',
+        `Order ${payload.orderReference} placed successfully (${payload.status}).`);
+
+      // The reference is also published to a dedicated element so a test can read it without
+      // parsing prose out of the success message.
+      alerts.insertAdjacentHTML('beforeend',
+        `<div class="hidden" data-testid="new-order-reference-text">${payload.orderReference}</div>`);
+    });
+
+    document.getElementById('order-form').addEventListener('reset', () => {
+      Ui.clearAlert(alerts);
+      setTimeout(syncLimitVisibility, 0);
+    });
+  </script>
+</body>
+</html>

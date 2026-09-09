@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>TradingDemo.AppModel</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    The application model: everything that is specific to the Trading Platform Demo.
+    Page objects, API clients, response contracts, user roles, shared BDD hooks.
+
+    This is the project that makes the whole structure worthwhile. The three test projects
+    (Api.Tests, Ui.Tests, Mobile.Tests) all reference this one, so the application is modelled
+    exactly once and each suite contributes only its own feature files and step definitions.
+    That is what allows a new suite - a contract suite, a nightly deep-regression suite, a
+    performance smoke suite - to be added without re-modelling anything.
+
+    It references Reqnroll because the shared hooks live here, and they are discovered by the
+    test projects through reqnroll.json's bindingAssemblies setting rather than being
+    copy-pasted into each suite.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Reqnroll.NUnit" />
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QaFramework.Api\QaFramework.Api.csproj" />
+    <ProjectReference Include="..\QaFramework.Core\QaFramework.Core.csproj" />
+    <ProjectReference Include="..\QaFramework.Web\QaFramework.Web.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,64 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- Target framework and language features are set once, here, for every project in the
+         repository. Individual .csproj files therefore only describe what makes them different. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!--
+      InvariantGlobalization is deliberately NOT enabled. It is a tempting default for a
+      self-contained demo, but Reqnroll resolves the feature-file language through
+      CultureInfo.GetCultureInfo("en-us"), which throws in invariant mode and fails the entire
+      suite in OneTimeSetUp. Culture-sensitivity is instead handled where it actually matters:
+      every number and date the framework formats or parses specifies InvariantCulture
+      explicitly, so behaviour does not depend on the agent's locale.
+    -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!-- Central Package Management: versions live in Directory.Packages.props so that a
+         dependency can never drift between projects. -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+    <!-- Treat warnings seriously. A test framework that does not compile cleanly is a test
+         framework nobody trusts. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors>CS8600;CS8602;CS8603;CS8618</WarningsAsErrors>
+
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Test projects share an identical runner setup. Declaring it once removes the copy/paste
+       drift that tends to accumulate across suites. -->
+  <PropertyGroup Condition="'$(IsTestSuite)' == 'true'">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
+    <!--
+      Reqnroll's generated code-behind goes to obj/ rather than sitting beside the .feature
+      files. Two reasons, and the first is the important one:
+        * obj/ is already git-ignored, so a generated file can never be committed or reviewed by
+          accident. Left in place, they get committed, then they go stale, and then somebody
+          spends an afternoon debugging a test that no longer matches its feature file.
+        * A reader browsing Features/ sees five feature files rather than ten, half of which are
+          machine output.
+    -->
+    <ReqnrollUseIntermediateOutputPathForCodeBehind>true</ReqnrollUseIntermediateOutputPathForCodeBehind>
+    <ReqnrollDeleteObsoleteCodeBehindFilesOnClean>true</ReqnrollDeleteObsoleteCodeBehindFilesOnClean>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestSuite)' == 'true'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="NUnit.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+
+</Project>

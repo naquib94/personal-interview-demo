@@ -1,0 +1,37 @@
+{
+  // iOS capabilities. Committed, and deliberately free of anything that identifies a real
+  // device, a real build artefact, a signing identity or a real account.
+  //
+  // deviceName matters far more on iOS than on Android: it selects the simulator, and a name
+  // that does not exist on the machine produces a session failure whose message mentions Xcode
+  // rather than configuration. A generic recent model is used here.
+  //
+  // app is empty for the same reason as on Android: no .app or .ipa is committed. Note that a
+  // real iOS run also needs a signing identity, which belongs in the environment and never in a
+  // file - which is precisely why capability files in this framework carry no credentials at all.
+  "platformName": "iOS",
+  "automationName": "XCUITest",
+  "deviceName": "iPhone 15",
+  "platformVersion": "",
+  "app": "",
+  "bundleId": "com.example.tradingdemo",
+
+  "noReset": false,
+  "fullReset": false,
+
+  // Higher than Android's: XCUITest sessions are slower to respond under load, and a torn-down
+  // session costs a full restart, so the extra headroom is cheap insurance.
+  "newCommandTimeoutSeconds": 180,
+
+  // Keys are written without the "appium:" prefix and the factory adds it; see the note in
+  // capabilities.android.json for why (':' is the configuration key separator).
+  "additional": {
+    // Reusing the WebDriverAgent build between sessions is the single largest saving available
+    // on iOS. It is safe because the agent is not the application under test.
+    "usePrebuiltWDA": "true",
+
+    // The picker-wheel default is unreliable on newer iOS versions; sending keys is the strategy
+    // that actually works, and stating it here beats rediscovering it per scenario.
+    "sendKeyStrategy": "oneByOne"
+  }
+}

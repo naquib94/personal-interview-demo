@@ -1,0 +1,26 @@
+{
+  // ==========================================================================================
+  // TEMPLATE - copy to Environment.Overrides.json and edit. That file is git-ignored.
+  // ==========================================================================================
+  // This is the only place a developer should put a credential. Anything set here overrides the
+  // committed Environment.{Env}.json for your machine only, and is layered underneath
+  // environment variables so CI can still win.
+  //
+  // Every key is optional: include only what you want to change. The demo works without this
+  // file at all, which is deliberate - a suite that requires manual setup before it will run
+  // once is a suite new joiners do not run.
+  //
+  // In CI, use environment variables instead of a file:
+  //   QA_Users__ActiveTrader__Password=...
+  //   QA_BaseUrl=https://...
+  // Double underscores denote nesting, which is the standard .NET configuration convention.
+  // ==========================================================================================
+
+  "BaseUrl": "http://localhost:5199",
+
+  "Users": {
+    "ActiveTrader": {
+      "Password": "put-your-own-value-here"
+    }
+  }
+}
